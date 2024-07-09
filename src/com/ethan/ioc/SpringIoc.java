@@ -39,10 +39,11 @@ public class SpringIoc {
     }
 
     /**
-     * 为所有带有 Component 注解的类创建对象
+     * 为所有带有 Component 注解的类创建对象, 并注入到对应的属性中
      */
     private void initBeans() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         beans = new HashMap<>();
+        // 找到所有带 '@Component' 注解的类, 为其创建对象
         for (String beanName : beanNames) {
             Class<?> clazz =  Class.forName(beanName);
             if (isComponent(clazz)) {
@@ -50,6 +51,7 @@ public class SpringIoc {
                 beans.put(clazz.getName(), obj);
             }
         }
+        // 为所有带 '@Autowired' 注解的属性注入对象
         for (Map.Entry<String, Object> entry : beans.entrySet()) {
             Field[] fields = entry.getValue().getClass().getDeclaredFields();
             for (Field field : fields) {
@@ -87,9 +89,11 @@ public class SpringIoc {
     private void initBeanNames() {
         beanNames = new ArrayList<>();
         for (String filePath : filePaths) {
-            String beanName = packageName
-                    + filePath.substring(classPath.length())
-                    .split(".java")[0]
+//            String beanName = packageName
+//                    + filePath.substring(classPath.length())
+//                    .split(".java")[0]
+//                    .replaceAll(Matcher.quoteReplacement(File.separator), ".");
+            String beanName = filePath.substring(classPath.length()-1).split(".class")[0]
                     .replaceAll(Matcher.quoteReplacement(File.separator), ".");
             beanNames.add(beanName);
         }
@@ -126,7 +130,9 @@ public class SpringIoc {
      * 初始化类路径, 这里直接写死
      */
     private void initPath() {
-        classPath = "D:\\Files\\IDEA-WorkSpace\\project\\spring_IOC_imitating\\src\\com\\ethan";
+//        classPath = "D:\\Files\\IDEA-WorkSpace\\project\\spring_IOC_imitating\\src\\com\\ethan";
+        // 从当前线程获取项目编译文件的根目录(out)
+        classPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
         packageName = "com.ethan";
     }
 }
